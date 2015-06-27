@@ -7,7 +7,7 @@ Created on 02/04/2010
 #edit the following options according to your needs
 PYRROT_DIR = ""
 DIRECTORIES = ["/path/to/your/video/files", "/path/to/your/video/files2"]
-LANGUAGES = ["pt","en"]
+LANGUAGES = ["en"]
 HASHES_FILE = 'pyrrot-uploaded.prt'
 LOG_FILE = 'pyrrot-log.txt'
 MOVIE_EXTS = ['.avi', '.mkv', '.mp4', '.m4v', '.mov', '.mpg', '.wmv']
@@ -180,11 +180,14 @@ def parse_options():
         base_url[1] = netloc
         base_url = urllib2.urlparse.urlunsplit(base_url)
     if options.dirs:
-        DIRECTORIES = options.dirs
+        DIRECTORIES = expand_dirs(options.dirs)
     if options.hashes:
         HASHES_FILE = options.hashes
     if options.log:
         LOG_FILE = options.log.strip()
+
+def expand_dirs(dirs):
+    return [d if d != "." else os.path.abspath(d) for d in dirs]
 
 def load_hashes_db():
     global uploaded
@@ -216,7 +219,9 @@ if __name__ == '__main__':
     if LOG_FILE:
         print "running... see the log in", LOG_FILE
     load_hashes_db()
+
     for folder in DIRECTORIES:
+        logger.info("Scanning " + folder)
         download_subtitles(folder, LANGUAGES)
         upload_subtitles(folder)
     save()
